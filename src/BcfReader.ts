@@ -1,25 +1,26 @@
-import JSZip, {JSZipObject} from "jszip";
 import {IMarkup, MarkupViewpoint} from "./schema";
 import {Helpers} from "./Helpers";
 import {VisualizationInfo} from "./schema";
+import {Reader, TypedArray, unzip, Zip, ZipEntry, ZipInfo} from 'unzipit';
 
 export class BcfReader{
 
-    bcf_archive: JSZip = new JSZip();
+    bcf_archive: ZipInfo | undefined
     topics: Topic[] = [];
 
-    read = async (url: string) => {
+    read = async (src: string | ArrayBuffer | TypedArray | Blob | Reader) => {
         try {
-            this.bcf_archive = await JSZip.loadAsync(url);
+            const topics: ZipEntry[] = [];
 
-            const topics: JSZipObject[] = [];
+            this.bcf_archive = await unzip(src);
 
-            this.bcf_archive.forEach((path: string, file) => {
-                const extension = path.split('.').pop();
-                if(extension === "bcf"){
-                    topics.push(file);
+            const { entries } = this.bcf_archive;
+
+            for (const [name, entry] of Object.entries(entries)) {
+                if (name.endsWith('.bcf')) {
+                    topics.push(entry);
                 }
-            })
+            }
 
             for (let i = 0; i < topics.length; i++) {
                 const t = topics[i]
@@ -32,17 +33,21 @@ export class BcfReader{
             console.error(e)
         }
     }
+
+    getEntry = (name: string) => {
+        return this.bcf_archive?.entries[name];
+    }
 }
 
 export class Topic {
 
     readonly reader: BcfReader;
-    readonly markup_file: JSZipObject;
+    readonly markup_file: ZipEntry;
 
     markup: IMarkup | undefined;
     viewpoints: VisualizationInfo[] = [];
 
-    constructor(reader: BcfReader, markup: JSZipObject) {
+    constructor(reader: BcfReader, markup: ZipEntry) {
         this.reader = reader;
         this.markup_file = markup;
     }
@@ -52,9 +57,10 @@ export class Topic {
         await this.parseViewpoints();
     }
 
+
+
     private parseMarkup = async () => {
-        const contents = await this.markup_file.async("string");
-        this.markup = Helpers.GetMarkup(contents);
+        this.markup = Helpers.GetMarkup(await this.markup_file.text());
     }
 
     private parseViewpoints = async () => {
@@ -66,12 +72,12 @@ export class Topic {
 
             for (let i = 0; i < viewpoints.length; i++) {
                 const entry = viewpoints[i];
-                const file = this.reader.bcf_archive.file(this.markup.topic.guid + "/" + entry.viewpoint);
+                const key = this.markup.topic.guid + "/" + entry.viewpoint;
+                const file = this.reader.getEntry(key);
 
-                const contents = await file?.async("string");
-                if (!contents) throw new Error("Missing Visualization Info");
+                if (!file) throw new Error("Missing Visualization Info");
 
-                const viewpoint = Helpers.GetViewpoint(contents);
+                const viewpoint = Helpers.GetViewpoint(await file.text());
                 this.viewpoints.push(viewpoint);
                 // Helpers.WriteJsonToFile(`./output/${name}/${id}/${entry.viewpoint}.json`, viewpoint);
             }
@@ -80,6 +86,6 @@ export class Topic {
 
     getViewpointSnapshot = async (viewpoint: MarkupViewpoint) => {
         if(!viewpoint || !this.markup) return;
-        return this.reader.bcf_archive.file(`${this.markup.topic.guid}/${viewpoint.snapshot}`)
+        return this.reader.getEntry(`${this.markup.topic.guid}/${viewpoint.snapshot}`);
     }
 }
