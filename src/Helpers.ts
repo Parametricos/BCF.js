@@ -143,15 +143,15 @@ export namespace Helpers {
             guid: Vis["@_Guid"],
             components: GetComponents(),
             orthogonal_camera: orthogonal_camera && {
-                camera_view_point: orthogonal_camera["CameraViewPoint"],
-                camera_direction: orthogonal_camera["CameraDirection"],
-                camera_up_vector: orthogonal_camera["CameraUpVector"],
+                camera_view_point: ParsePoint(orthogonal_camera["CameraViewPoint"]),
+                camera_direction: ParsePoint(orthogonal_camera["CameraDirection"]),
+                camera_up_vector: ParsePoint(orthogonal_camera["CameraUpVector"]),
                 view_to_world_scale: orthogonal_camera["ViewToWorldScale"]
             },
             perspective_camera: perspective_camera && {
-                camera_view_point: perspective_camera["CameraViewPoint"],
-                camera_direction: perspective_camera["CameraDirection"],
-                camera_up_vector: perspective_camera["CameraUpVector"],
+                camera_view_point: ParsePoint(perspective_camera["CameraViewPoint"]),
+                camera_direction: ParsePoint(perspective_camera["CameraDirection"]),
+                camera_up_vector: ParsePoint(perspective_camera["CameraUpVector"]),
                 field_of_view: perspective_camera["FieldOfView"]
             },
         };
@@ -218,5 +218,13 @@ export namespace Helpers {
      */
     export function ObjectToArray(data: any) {
         return Array.isArray(data) ? data : [data]
+    }
+
+    export function ParsePoint(point: any){
+        return {
+            x: point.X,
+            y: point.Y,
+            z: point.Z
+        }
     }
 }

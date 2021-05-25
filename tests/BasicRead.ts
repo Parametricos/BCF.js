@@ -7,7 +7,9 @@ const test = async () => {
     await reader.read(file);
 
     reader.topics.forEach((topic) => {
-        console.log(topic.markup?.topic.title)
+        if(topic.viewpoints.length > 0){
+            console.log(topic.viewpoints[0].perspective_camera)
+        }
     })
 }
 
