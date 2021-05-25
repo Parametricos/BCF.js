@@ -84,8 +84,11 @@ export class Topic {
         }
     }
 
-    getViewpointSnapshot = async (viewpoint: MarkupViewpoint) => {
+    getViewpointSnapshot = async (viewpoint: MarkupViewpoint) : Promise<Blob | undefined> => {
         if(!viewpoint || !this.markup) return;
-        return this.reader.getEntry(`${this.markup.topic.guid}/${viewpoint.snapshot}`);
+        const entry = this.reader.getEntry(`${this.markup.topic.guid}/${viewpoint.snapshot}`);
+        if(entry){
+            return await entry.blob()
+        }
     }
 }

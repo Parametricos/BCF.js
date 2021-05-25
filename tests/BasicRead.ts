@@ -6,10 +6,20 @@ const test = async () => {
     const reader = new BcfReader();
     await reader.read(file);
 
+
     reader.topics.forEach((topic) => {
         if(topic.viewpoints.length > 0){
             console.log(topic.viewpoints[0].perspective_camera)
+
+            const v = topic?.markup?.viewpoints;
+
+            if(!v) return;
+
+            topic.getViewpointSnapshot(v[0]).then((data) => {
+                console.log(data);
+            })
         }
+
     })
 }
 
