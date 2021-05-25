@@ -1,6 +1,6 @@
 {
   "name": "@parametricos/bcf-js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "dist/index.js",
   "author": "hc@parametricos.com",
   "scripts": {
