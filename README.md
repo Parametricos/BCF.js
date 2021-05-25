@@ -11,7 +11,21 @@ https://www.npmjs.com/package/bcf-js
 
 ## Using the library
 
+
 ```
+  import { BcfReader} from '@parametricos/bcf-js';
+
   ...
+
+  const file = "some_bcf_file.bcf"
+
+  const reader = new BcfReader();
+  
+  await reader.read(file);
+  
+  reader.topics.forEach((topic) => {
+    console.log(topic);
+  })
+  
 ```
 
