@@ -1,6 +1,7 @@
 # bcf-js
 
 bcf-js is a [BIM Collaboration Format](https://technical.buildingsmart.org/standards/bcf/ "BIM Collaboration Format") (BCF) reader & parser.
+bcf-js is ready for BCF 2.1
 
 Find it on npmjs.com https://www.npmjs.com/package/@parametricos/bcf-js
 
@@ -13,7 +14,7 @@ To install the library use:
 ## Contribution
 There's a few ways to contribute to this project and improve it:
 1. Fork the project repository and make your first pull request
-2. Submit sample BCF and it's linked IFC files in the Examples folder
+2. Submit sample BCF and it's linked IFC files in the 'test-data' folder
 3. Test it and create Issues so that we can start working on them
 
 Please feel free to contact us about contributing at info@parametricos.com or send us a message on [Linkedin](https://www.linkedin.com/company/parametricos/), [Twitter](https://twitter.com/parametricoscom) & [Instagram](https://www.instagram.com/parametricoscompany/)
