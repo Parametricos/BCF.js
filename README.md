@@ -20,7 +20,7 @@ There's a few ways to contribute to this project and improve it:
 Please feel free to contact us about contributing at info@parametricos.com or send us a message on [Linkedin](https://www.linkedin.com/company/parametricos/), [Twitter](https://twitter.com/parametricoscom) & [Instagram](https://www.instagram.com/parametricoscompany/)
 
 ## Join our Community
-Ask us to invite you to our Slack Channels or join our newly created community on [Discord](https://discord.gg/GVx6tARC)
+Ask us to invite you to our Slack Channels or join our newly created community on [Discord](https://discord.gg/qcTMXVa44S)
 
 ## Using the library
 
