@@ -1,15 +1,13 @@
 export interface IMarkup {
     header?: IHeader
-    topic: ITopic,
-    comments?: IComment[],
-    viewpoints?: MarkupViewpoint[]
+    topic: ITopic | undefined
 }
 
 export interface IHeader {
-   file: IHeaderFile[]
+    files?: IFile[]
 }
 
-export interface IHeaderFile {
+export interface IFile {
     ifc_project: string,
     ifc_spatial_structure_element: string,
     is_external: boolean,
@@ -20,13 +18,14 @@ export interface IHeaderFile {
 
 export interface ITopic {
     guid: string,
+    server_assigned_id?: string,
     topic_type: string,
     topic_status: string,
-    reference_link?: string[],
+    //reference_links?: IReferenceLink[] | undefined,
     title: string,
     priority?: string,
     index?: number
-    labels?: string[],
+    labels?: ILabel[],
     creation_date: Date,
     creation_author: string,
     modified_date?: Date,
@@ -35,22 +34,24 @@ export interface ITopic {
     assigned_to?: string,
     stage?: string,
     description?: string,
-    bim_snippets?: TopicBimSnippet[],
-    document_references?: TopicDocumentReference[],
-    related_topics?: string[]
+    //bim_snippets?: IBimSnippet[] | undefined,
+    //document_references?: IDocumentReference[],
+    //related_topics?: IRelatedTopic[] | undefined,
+    comments?: IComment[],
+    viewpoints?: IViewPoint[] ,
 }
 
-export interface TopicBimSnippet {
+export interface IBimSnippet {
     snippet_type: string,
     is_external: boolean,
     reference: string,
     reference_schema: string
 }
 
-export interface TopicDocumentReference {
+export interface IDocumentReference {
     guid: string,
-    is_external: boolean,
-    referenced_document?: string,
+    document_guid: string,
+    url:string,
     description?: string
 }
 
@@ -64,9 +65,16 @@ export interface IComment {
     modified_author?: string
 }
 
-export interface MarkupViewpoint {
+export interface IViewPoint {
     guid: string,
     viewpoint?: string,
     snapshot?: string,
     index?: number
 }
+
+// export type NonEmptyOrBlankString = string
+// export type Guid = string
+// export type IfcGuid = string
+export type IRelatedTopic = string
+export type ILabel = string
+export type IReferenceLink = string
