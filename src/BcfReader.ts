@@ -1,7 +1,7 @@
-import { IMarkup, IViewPoint, ITopic } from "./schema"
+import { IViewPoint, ITopic } from "./schema"
 import { Helpers } from "./Helpers"
 import { VisualizationInfo } from "./schema"
-import { Reader, TypedArray, unzip, Zip, ZipEntry, ZipInfo } from 'unzipit'
+import { Reader, TypedArray, unzip, ZipEntry, ZipInfo } from 'unzipit'
 
 export class BcfReader {
 
@@ -26,8 +26,7 @@ export class BcfReader {
                 const t = markups[i]
                 const markup = new Markup(this, t)
                 await markup.read()
-                if (!markup.topic == undefined)
-                    this.markups.push(markup)
+                this.markups.push(markup)
             }
         } catch (e) {
             console.log("Error in loading BCF archive. The error below was thrown.")
@@ -54,9 +53,9 @@ export class Markup {
         this.markup_file = markup
     }
 
-    read = () => {
-        this.parseMarkup()
-        this.parseViewpoints()
+    read = async () => {
+        await this.parseMarkup()
+        await this.parseViewpoints()
     }
 
     private parseMarkup = async () => {

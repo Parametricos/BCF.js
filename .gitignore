@@ -104,3 +104,7 @@ dist
 .tern-port
 
 .idea/
+
+# VsCode
+BCF-js.code-workspace
+.vscode/

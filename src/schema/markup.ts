@@ -21,7 +21,7 @@ export interface ITopic {
     server_assigned_id?: string,
     topic_type: string,
     topic_status: string,
-    //reference_links?: IReferenceLink[] | undefined,
+    reference_links?: IReferenceLink[] | undefined,
     title: string,
     priority?: string,
     index?: number
@@ -34,9 +34,9 @@ export interface ITopic {
     assigned_to?: string,
     stage?: string,
     description?: string,
-    //bim_snippets?: IBimSnippet[] | undefined,
-    //document_references?: IDocumentReference[],
-    //related_topics?: IRelatedTopic[] | undefined,
+    bim_snippets?: IBimSnippet[] | undefined,
+    document_references?: IDocumentReference[],
+    related_topics?: IRelatedTopic[] | undefined,
     comments?: IComment[],
     viewpoints?: IViewPoint[] ,
 }

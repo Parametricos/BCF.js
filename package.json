@@ -25,8 +25,9 @@
   "repository": "https://github.com/Parametricos/bcf-js",
   "scripts": {
     "build": "tsc",
-    "run": "node test/BasicRead.js",
-    "test": "jest --watchAll --verbose --debug"
+    "run-example": "node test/BasicRead.js",
+    "build-n-run": "tsc && node test/BasicRead.js",
+    "test": "jest --watchAll --verbose --silent=false"
   },
   "devDependencies": {
     "@babel/preset-env": "7.22.9",

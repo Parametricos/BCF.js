@@ -7,7 +7,6 @@ const test = async () => {
     await reader.read(file)
 
     reader.markups.forEach((markup) => {
-
         if (markup.topic == undefined)
             return
 
