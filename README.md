@@ -1,7 +1,7 @@
 # bcf-js
 
 bcf-js is a [BIM Collaboration Format](https://technical.buildingsmart.org/standards/bcf/ "BIM Collaboration Format") (BCF) reader & parser.
-bcf-js is ready for BCF 2.1
+bcf-js is ready for BCF 3.0
 
 Find it on npmjs.com https://www.npmjs.com/package/@parametricos/bcf-js
 
@@ -35,8 +35,8 @@ Ask us to invite you to our Slack Channels or join our newly created community o
   
   await reader.read(file);
   
-  reader.topics.forEach((topic) => {
-    console.log(topic);
+  reader.markups.forEach((markup) => {
+    console.log(markup.topic);
   })
   
 ```
