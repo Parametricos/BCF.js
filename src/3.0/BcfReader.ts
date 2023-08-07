@@ -1,6 +1,5 @@
-import { IViewPoint, ITopic } from "./schema"
+import { IViewPoint, ITopic, VisualizationInfo } from "./schema"
 import { Helpers } from "./Helpers"
-import { VisualizationInfo } from "./schema"
 import { Reader, TypedArray, unzip, ZipEntry, ZipInfo } from 'unzipit'
 
 export class BcfReader {

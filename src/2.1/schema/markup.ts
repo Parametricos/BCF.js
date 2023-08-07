@@ -1,13 +1,15 @@
 export interface IMarkup {
     header?: IHeader
-    topic: ITopic | undefined
+    topic: ITopic,
+    comments?: IComment[],
+    viewpoints?: MarkupViewpoint[]
 }
 
 export interface IHeader {
-    files?: IFile[]
+   file: IHeaderFile[]
 }
 
-export interface IFile {
+export interface IHeaderFile {
     ifc_project: string,
     ifc_spatial_structure_element: string,
     is_external: boolean,
@@ -18,14 +20,13 @@ export interface IFile {
 
 export interface ITopic {
     guid: string,
-    server_assigned_id?: string,
     topic_type: string,
     topic_status: string,
-    reference_links?: IReferenceLink[] | undefined,
+    reference_link?: string[],
     title: string,
     priority?: string,
     index?: number
-    labels?: ILabel[],
+    labels?: string[],
     creation_date: Date,
     creation_author: string,
     modified_date?: Date,
@@ -34,24 +35,22 @@ export interface ITopic {
     assigned_to?: string,
     stage?: string,
     description?: string,
-    bim_snippets?: IBimSnippet[] | undefined,
-    document_references?: IDocumentReference[],
-    related_topics?: IRelatedTopic[] | undefined,
-    comments?: IComment[],
-    viewpoints?: IViewPoint[] ,
+    bim_snippets?: TopicBimSnippet[],
+    document_references?: TopicDocumentReference[],
+    related_topics?: string[]
 }
 
-export interface IBimSnippet {
+export interface TopicBimSnippet {
     snippet_type: string,
     is_external: boolean,
     reference: string,
     reference_schema: string
 }
 
-export interface IDocumentReference {
+export interface TopicDocumentReference {
     guid: string,
-    document_guid: string,
-    url:string,
+    is_external: boolean,
+    referenced_document?: string,
     description?: string
 }
 
@@ -65,16 +64,9 @@ export interface IComment {
     modified_author?: string
 }
 
-export interface IViewPoint {
+export interface MarkupViewpoint {
     guid: string,
     viewpoint?: string,
     snapshot?: string,
     index?: number
 }
-
-// export type NonEmptyOrBlankString = string
-// export type Guid = string
-// export type IfcGuid = string
-export type IRelatedTopic = string
-export type ILabel = string
-export type IReferenceLink = string
