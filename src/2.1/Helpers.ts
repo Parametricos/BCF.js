@@ -1,5 +1,5 @@
-import {IComment, IMarkup, MarkupViewpoint} from "./schema";
-import * as parser from "fast-xml-parser";
+import {IComment, IMarkup, IViewpoint} from "./schema";
+import parser from "fast-xml-parser";
 import {
     Component,
     ComponentColoring,
@@ -160,7 +160,7 @@ export namespace Helpers {
     export function GetViewpoints(data: any) {
         if(!data) return;
 
-        const constructViewpoint = (data: any): MarkupViewpoint => {
+        const constructViewpoint = (data: any): IViewpoint => {
             return {
                 guid: data["@_Guid"],
                 viewpoint: data["Viewpoint"],
@@ -168,7 +168,7 @@ export namespace Helpers {
             };
         }
 
-        const viewpoints: MarkupViewpoint[] = []
+        const viewpoints: IViewpoint[] = []
 
         if(Array.isArray(data)){
             data.forEach((x) => {

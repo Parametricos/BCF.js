@@ -1,4 +1,4 @@
-import { IViewPoint, ITopic, VisualizationInfo } from "./schema"
+import { IViewPoint, ITopic, VisualizationInfo, IHeader } from "./schema"
 import { Helpers } from "./Helpers"
 import { Reader, TypedArray, unzip, ZipEntry, ZipInfo } from 'unzipit'
 
@@ -43,7 +43,7 @@ export class Markup {
     readonly reader: BcfReader
     readonly markup_file: ZipEntry
 
-    //TODO: header
+    header: IHeader | undefined
     topic: ITopic | undefined
     viewpoints: VisualizationInfo[] = [];
 
@@ -58,7 +58,9 @@ export class Markup {
     }
 
     private parseMarkup = async () => {
-        this.topic = Helpers.GetMarkup(await this.markup_file.text()).topic
+        const markup = Helpers.GetMarkup(await this.markup_file.text())
+        this.topic = markup.topic
+        this.header = markup.header
     }
 
     private parseViewpoints = async () => {
@@ -77,16 +79,15 @@ export class Markup {
 
                 const viewpoint = Helpers.GetViewpoint(await file.text())
                 this.viewpoints.push(viewpoint)
-                //TODO: Helpers.WriteJsonToFile(`./output/${name}/${id}/${entry.viewpoint}.json`, viewpoint);
             }
         }
     }
 
-    getViewpointSnapshot = async (viewpoint: IViewPoint): Promise<Blob | undefined> => {
+    getViewpointSnapshot = async (viewpoint: IViewPoint): Promise<ArrayBuffer | undefined> => {
         if (!viewpoint || !this.topic) return
         const entry = this.reader.getEntry(`${this.topic.guid}/${viewpoint.snapshot}`)
         if (entry) {
-            return await entry.blob()
+            return await entry.arrayBuffer()
         }
     }
 }

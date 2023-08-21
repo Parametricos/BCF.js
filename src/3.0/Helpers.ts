@@ -1,4 +1,4 @@
-import { IComment, IMarkup, IViewPoint } from "./schema"
+import { IHeader, IMarkup, ITopic } from "./schema"
 import { parse } from "fast-xml-parser"
 import {
     Component,
@@ -8,6 +8,7 @@ import {
     ViewSetupHints,
     VisualizationInfo
 } from "./schema"
+
 
 export namespace Helpers {
 
@@ -21,34 +22,23 @@ export namespace Helpers {
         trimValues: true,
     }
 
+    const arrayProps = [
+        "ReferenceLinks",
+        "Labels",
+        "DocumentReferences",
+        "RelatedTopics",
+        "Comments",
+        "Viewpoints",
+        "Files"
+    ]
+
     export function GetMarkup(xmlString: any): IMarkup {
         const { Markup } = parse(xmlString, xmlParserOptions)
+        const formattedMarkup = xmlToJsonNotation(Markup)
 
-        //TODO: read header
         return {
-            topic: {
-                guid: Markup.Topic['@_Guid'],
-                topic_type: Markup.Topic["@_TopicType"],
-                topic_status: Markup.Topic["@_TopicStatus"],
-                reference_links: Markup.Topic["ReferenceLink"] && Helpers.ObjectToArray(Markup.Topic["ReferenceLink"]),
-                title: Markup.Topic["Title"],
-                priority: Markup.Topic["Priority"],
-                index: Markup.Topic["Index"],
-                labels: Markup.Topic["Labels"],
-                //labels: Markup.Topic["Labels"] && Helpers.ObjectToArray(Markup.Topic["Labels"]),
-                creation_date: Markup.Topic["CreationDate"],
-                creation_author: Markup.Topic["CreationAuthor"],
-                modified_date: Markup.Topic["ModifiedDate"],
-                modified_author: Markup.Topic["ModifiedAuthor"],
-                assigned_to: Markup.Topic["AssignedTo"],
-                description: Markup.Topic["Description"],
-                //bim_snippets: Markup.ITopic["BimSnippet"] && Helpers.ObjectToArray(Markup.Topic["BimSnippet"]),
-                //related_topics: Markup.ITopic["RelatedTopic"] && Helpers.ObjectToArray(Markup.Topic["RelatedTopic"]),
-                comments: GetComments(Markup.Topic["Comments"]["Comment"]),
-                viewpoints: GetViewpoints(Markup.Topic["Viewpoints"]["ViewPoint"]),
-                //comments: Helpers.GetComments(Markup.Topic["Comments"]["Comment"]),
-                //viewpoints: Helpers.GetViewpoints(Markup.Topic["Viewpoints"]["ViewPoint"])
-            },
+            header: formattedMarkup.header as IHeader,
+            topic: formattedMarkup.topic as ITopic
         }
     }
 
@@ -141,8 +131,6 @@ export namespace Helpers {
             }
         }
 
-        //TODO: Helpers.WriteJsonToFile("./parsed/viewpoint" + Vis["@_Guid"] + ".json", Vis);
-
         return {
             guid: Vis["@_Guid"],
             components: GetComponents(),
@@ -161,58 +149,59 @@ export namespace Helpers {
         }
     }
 
-    export function GetViewpoints(data: any) {
-        if (!data) return
+    function fixArraysNodes(value: any) {
+        let result: any = {}
 
-        const constructViewpoint = (data: any): IViewPoint => {
-            return {
-                guid: data["@_Guid"],
-                viewpoint: data["Viewpoint"],
-                snapshot: data["Snapshot"],
-                index: data["Index"]
+        if (typeof value === 'string' || typeof value === 'number' || Array.isArray(value))
+            return value
+
+        for (const child in value) {
+            if (!arrayProps.includes(child)) {
+                result[child] = value[child]
+                continue
             }
+
+            result[child] = []
+            const val = Object.values(value[child])[0]
+            
+            if (Array.isArray(val))
+                result[child] = val
+            else
+                result[child].push(val)
         }
 
-        const viewpoints: IViewPoint[] = []
-
-        if (Array.isArray(data)) {
-            data.forEach((x) => {
-                viewpoints.push(constructViewpoint(x))
-            })
-        } else {
-            viewpoints.push(constructViewpoint(data))
-        }
-
-        return viewpoints
+        return result
     }
 
-    export function GetComments(data: any) {
-        if (!data) return
+    function xmlToJsonNotation(node: any) {
+        if (!node) return
 
-        const constructComment = (data: any): IComment => {
-            return {
-                guid: data["@_Guid"],
-                date: data["Date"],
-                author: data["Author"],
-                comment: data["Comment"],
-                viewpoint: data?.Viewpoint?.["@_Guid"],
-                modified_date: data["ModifiedDate"],
-                modified_author: data["ModifiedAuthor"]
-            }
+        const isArray = Array.isArray(node)
+        let outputNode: any = isArray ? [] : {}
+
+        if (typeof node === 'string')
+            return node
+
+        for (const child in node) {
+            let value = node[child]
+
+            if (!value)
+                continue
+
+            let key = child
+                .replace(/^@_/g, "")
+                .replace(/((?<=^@_).|^[A-Z])/g, match => match.toLowerCase())
+                .replaceAll(/[A-Z]/g, match => "_" + match.toLowerCase())
+
+            if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')
+                outputNode[key] = value
+            else
+                outputNode[key] = xmlToJsonNotation(fixArraysNodes(value))
         }
 
-        const comments: IComment[] = []
-
-        if (Array.isArray(data)) {
-            data.forEach((x) => {
-                comments.push(constructComment(x))
-            })
-        } else {
-            comments.push(constructComment(data))
-        }
-
-        return comments
+        return outputNode
     }
+
     /**
      * Returns an object as an array
      * Can also accept array and returns new array if type is unknown
@@ -220,15 +209,6 @@ export namespace Helpers {
      * @return data as an array
      * @param data
      */
-    export function ObjectToArray2<T>(data: any, parameterName: string) {
-        const children = Array.isArray(data) ? data : [data]
-        const resultArray: { [x: string]: any }[] = []
-        children.forEach(child => {
-            console.log('child', child)
-            resultArray.push({ [parameterName]: child })
-        })
-        return resultArray
-    }
     export function ObjectToArray(data: any) {
         return Array.isArray(data) ? data : [data]
     }

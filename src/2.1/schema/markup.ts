@@ -2,14 +2,14 @@ export interface IMarkup {
     header?: IHeader
     topic: ITopic,
     comments?: IComment[],
-    viewpoints?: MarkupViewpoint[]
+    viewpoints?: IViewpoint[]
 }
 
 export interface IHeader {
-   file: IHeaderFile[]
+   file: IFile[]
 }
 
-export interface IHeaderFile {
+export interface IFile {
     ifc_project: string,
     ifc_spatial_structure_element: string,
     is_external: boolean,
@@ -35,19 +35,19 @@ export interface ITopic {
     assigned_to?: string,
     stage?: string,
     description?: string,
-    bim_snippets?: TopicBimSnippet[],
-    document_references?: TopicDocumentReference[],
+    bim_snippets?: IBimSnippet[],
+    document_references?: IDocumentReference[],
     related_topics?: string[]
 }
 
-export interface TopicBimSnippet {
+export interface IBimSnippet {
     snippet_type: string,
     is_external: boolean,
     reference: string,
     reference_schema: string
 }
 
-export interface TopicDocumentReference {
+export interface IDocumentReference {
     guid: string,
     is_external: boolean,
     referenced_document?: string,
@@ -64,7 +64,7 @@ export interface IComment {
     modified_author?: string
 }
 
-export interface MarkupViewpoint {
+export interface IViewpoint {
     guid: string,
     viewpoint?: string,
     snapshot?: string,

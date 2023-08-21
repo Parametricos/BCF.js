@@ -9,7 +9,7 @@ Find it on npmjs.com https://www.npmjs.com/package/@parametricos/bcf-js
 
 ## Getting Started
 To install the library use:
-`npm install @parametricos/bcf-js` or `yarn add @parametricos/bcf-js`
+`npm install @nelsonhp3/bcf-js` or `yarn add @nelsonhp3/bcf-js`
 
 ## Contribution
 There's a few ways to contribute to this project and improve it:
@@ -24,8 +24,10 @@ Ask us to invite you to our Slack Channels or join our newly created community o
 
 ## Using the library
 
+For BCF-XML 2.1:
+
 ```
-  import { BcfReader } from '@parametricos/bcf-js';
+  import { BcfReader } from '@nelsonhp3/bcf-js';
 
   ...
 

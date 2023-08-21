@@ -4,7 +4,7 @@ export interface IMarkup {
 }
 
 export interface IHeader {
-    files?: IFile[]
+    files?: IFile[] | undefined
 }
 
 export interface IFile {
@@ -21,11 +21,11 @@ export interface ITopic {
     server_assigned_id?: string,
     topic_type: string,
     topic_status: string,
-    reference_links?: string[],
+    reference_links?: string[] | undefined,
     title: string,
     priority?: string,
     index?: number
-    labels?: string[],
+    labels?: string[] | undefined,
     creation_date: Date,
     creation_author: string,
     modified_date?: Date,
@@ -35,10 +35,10 @@ export interface ITopic {
     stage?: string,
     description?: string,
     bim_snippets?: IBimSnippet[] | undefined,
-    document_references?: IDocumentReference[],
-    related_topics?: string[],
-    comments?: IComment[],
-    viewpoints?: IViewPoint[] ,
+    document_references?: IDocumentReference[] | undefined,
+    related_topics?: string[] | undefined,
+    comments?: IComment[] | undefined,
+    viewpoints?: IViewPoint[] | undefined ,
 }
 
 export interface IBimSnippet {
