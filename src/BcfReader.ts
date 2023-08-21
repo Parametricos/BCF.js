@@ -1,11 +1,19 @@
 import { IViewPoint, ITopic, VisualizationInfo, IHeader } from "./schema"
-import { Helpers } from "./Helpers"
+import { IHelpers } from "./IHelpers"
 import { Reader, TypedArray, unzip, ZipEntry, ZipInfo } from 'unzipit'
+import { stringify } from "querystring"
 
-export class BcfReader {
+export default class BcfReader {
 
+    version: string
     bcf_archive: ZipInfo | undefined
-    markups: Markup[] = [];
+    markups: Markup[] = []
+    helpers: IHelpers
+
+    constructor(version: string, helpers: IHelpers) {
+        this.version = version
+        this.helpers = helpers
+    }
 
     read = async (src: string | ArrayBuffer | TypedArray | Blob | Reader) => {
         try {
@@ -58,7 +66,7 @@ export class Markup {
     }
 
     private parseMarkup = async () => {
-        const markup = Helpers.GetMarkup(await this.markup_file.text())
+        const markup = this.reader.helpers.GetMarkup(await this.markup_file.text())
         this.topic = markup.topic
         this.header = markup.header
     }
@@ -77,7 +85,7 @@ export class Markup {
 
                 if (!file) throw new Error("Missing Visualization Info")
 
-                const viewpoint = Helpers.GetViewpoint(await file.text())
+                const viewpoint = this.reader.helpers.GetViewpoint(await file.text())
                 this.viewpoints.push(viewpoint)
             }
         }

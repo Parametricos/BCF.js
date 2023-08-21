@@ -1,5 +1,5 @@
-import {IComment, IMarkup, IViewpoint} from "./schema";
-import parser from "fast-xml-parser";
+import { IComment, IMarkup, IViewPoint } from "../schema"
+import parser from "fast-xml-parser"
 import {
     Component,
     ComponentColoring,
@@ -7,7 +7,7 @@ import {
     ComponentVisibility,
     ViewSetupHints,
     VisualizationInfo
-} from "./schema";
+} from "../schema"
 
 export namespace Helpers {
 
@@ -19,17 +19,17 @@ export namespace Helpers {
         parseNodeValue: true,
         parseAttributeValue: true,
         trimValues: true,
-    };
+    }
 
     export function GetMarkup(xmlString: any): IMarkup {
-        const { Markup } = parser.parse(xmlString, xmlParserOptions);
+        const { Markup } = parser.parse(xmlString, xmlParserOptions)
 
         return {
             topic: {
                 guid: Markup.Topic['@_Guid'],
                 topic_type: Markup.Topic["@_TopicType"],
                 topic_status: Markup.Topic["@_TopicStatus"],
-                reference_link: Markup.Topic["ReferenceLink"] && Helpers.ObjectToArray(Markup.Topic["ReferenceLink"]),
+                reference_links: Markup.Topic["ReferenceLink"] && Helpers.ObjectToArray(Markup.Topic["ReferenceLink"]),
                 title: Markup.Topic["Title"],
                 priority: Markup.Topic["Priority"],
                 index: Markup.Topic["Index"],
@@ -42,10 +42,10 @@ export namespace Helpers {
                 description: Markup.Topic["Description"],
                 // bim_snippets: Markup.ITopic["BimSnippet"] ? ,
                 // related_topics: Markup.ITopic["ReferenceLink"],
+                comments: Helpers.GetComments(Markup.Comment),
+                viewpoints: Helpers.GetViewpoints(Markup.Viewpoints)
             },
-            comments: Helpers.GetComments(Markup.Comment),
-            viewpoints: Helpers.GetViewpoints(Markup.Viewpoints)
-        };
+        }
     }
 
     export function GetVisInfoComponent(xmlData: any): Component {
@@ -55,26 +55,26 @@ export namespace Helpers {
     }
 
     export function GetViewpoint(xmlString: any): VisualizationInfo {
-        const { VisualizationInfo } = parser.parse(xmlString, xmlParserOptions);
-        const Vis = VisualizationInfo;
+        const { VisualizationInfo } = parser.parse(xmlString, xmlParserOptions)
+        const Vis = VisualizationInfo
 
         //Camera
-        const orthogonal_camera = Vis["OrthogonalCamera"];
-        const perspective_camera = Vis["PerspectiveCamera"];
+        const orthogonal_camera = Vis["OrthogonalCamera"]
+        const perspective_camera = Vis["PerspectiveCamera"]
 
         //Extras
-        const lines = Vis["Lines"];
-        const clipping_planes = Vis["ClippingPlanes"];
+        const lines = Vis["Lines"]
+        const clipping_planes = Vis["ClippingPlanes"]
 
-        const GetComponents = () : Components | undefined => {
+        const GetComponents = (): Components | undefined => {
 
-            if(!Vis["Components"]) return undefined;
-            const components = Vis["Components"];
+            if (!Vis["Components"]) return undefined
+            const components = Vis["Components"]
 
             const GetViewSetupHints = (): ViewSetupHints | undefined => {
 
-                if(!components["ViewSetupHints"]) return undefined
-                const view_setup_hints = components["ViewSetupHints"];
+                if (!components["ViewSetupHints"]) return undefined
+                const view_setup_hints = components["ViewSetupHints"]
 
                 return {
                     spaces_visible: view_setup_hints["@_SpacesVisible"],
@@ -84,10 +84,10 @@ export namespace Helpers {
             }
 
             const GetVisibility = (): ComponentVisibility => {
-                if(!components["Visibility"])
+                if (!components["Visibility"])
                     throw new Error("Visibility not found.")
 
-                const visibility = components["Visibility"];
+                const visibility = components["Visibility"]
                 return {
                     default_visibility: visibility["@_DefaultVisibility"],
                     exceptions:
@@ -99,33 +99,33 @@ export namespace Helpers {
                 }
             }
 
-            const GetSelection = () : Component[] | undefined => {
-                if(!components["Selection"]) return undefined;
+            const GetSelection = (): Component[] | undefined => {
+                if (!components["Selection"]) return undefined
 
-                const selection = components["Selection"];
-                const arr = Helpers.ObjectToArray(selection["Component"]);
+                const selection = components["Selection"]
+                const arr = Helpers.ObjectToArray(selection["Component"])
                 return arr?.map((exception: any) => {
                     return Helpers.GetVisInfoComponent(exception)
                 })
             }
 
-            const GetColoring = () : ComponentColoring[] | undefined => {
+            const GetColoring = (): ComponentColoring[] | undefined => {
 
-                if(!components["Coloring"]) return undefined;
-                const coloring = components["Coloring"];
+                if (!components["Coloring"]) return undefined
+                const coloring = components["Coloring"]
 
-                const colors = coloring["Color"];
-                if(!colors) return undefined;
+                const colors = coloring["Color"]
+                if (!colors) return undefined
 
                 return Helpers.ObjectToArray(colors).map((color: any) => (
-                        {
-                            color: color["@_Color"],
-                            components: Helpers.ObjectToArray(color["Component"])
-                                .map((exception: any) => {
-                                    return Helpers.GetVisInfoComponent(exception)
-                                })
-                        }
-                    )
+                    {
+                        color: color["@_Color"],
+                        components: Helpers.ObjectToArray(color["Component"])
+                            .map((exception: any) => {
+                                return Helpers.GetVisInfoComponent(exception)
+                            })
+                    }
+                )
                 )
             }
 
@@ -154,35 +154,35 @@ export namespace Helpers {
                 camera_up_vector: ParsePoint(perspective_camera["CameraUpVector"]),
                 field_of_view: perspective_camera["FieldOfView"]
             },
-        };
+        }
     }
 
     export function GetViewpoints(data: any) {
-        if(!data) return;
+        if (!data) return
 
-        const constructViewpoint = (data: any): IViewpoint => {
+        const constructViewpoint = (data: any): IViewPoint => {
             return {
                 guid: data["@_Guid"],
                 viewpoint: data["Viewpoint"],
                 snapshot: data["Snapshot"]
-            };
+            }
         }
 
-        const viewpoints: IViewpoint[] = []
+        const viewpoints: IViewPoint[] = []
 
-        if(Array.isArray(data)){
+        if (Array.isArray(data)) {
             data.forEach((x) => {
-                viewpoints.push(constructViewpoint(x));
+                viewpoints.push(constructViewpoint(x))
             })
-        }else {
+        } else {
             viewpoints.push(constructViewpoint(data))
         }
 
-        return viewpoints;
+        return viewpoints
     }
 
     export function GetComments(data: any) {
-        if(!data) return;
+        if (!data) return
 
         const constructComment = (data: any): IComment => {
             return {
@@ -193,20 +193,20 @@ export namespace Helpers {
                 viewpoint: data?.Viewpoint?.["@_Guid"],
                 modified_date: data["ModifiedDate"],
                 modified_author: data["ModifiedAuthor"]
-            };
+            }
         }
 
         const viewpoints: IComment[] = []
 
-        if(Array.isArray(data)){
+        if (Array.isArray(data)) {
             data.forEach((x) => {
-                viewpoints.push(constructComment(x));
+                viewpoints.push(constructComment(x))
             })
-        }else {
+        } else {
             viewpoints.push(constructComment(data))
         }
 
-        return viewpoints;
+        return viewpoints
     }
 
     /**
@@ -220,7 +220,7 @@ export namespace Helpers {
         return Array.isArray(data) ? data : [data]
     }
 
-    export function ParsePoint(point: any){
+    export function ParsePoint(point: any) {
         return {
             x: point.X,
             y: point.Y,

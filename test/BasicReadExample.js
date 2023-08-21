@@ -1,4 +1,4 @@
-const bcfjs21 = require("../dist")
+const bcfjs21 = require("../dist/2.1")
 const bcfjs30 = require("../dist/3.0")
 const fs = require("fs/promises")
 
@@ -7,15 +7,15 @@ const testV21 = async () => {
     const reader = new bcfjs21.BcfReader()
     await reader.read(file)
 
-    reader.topics.forEach((topic) => {
-        if (topic.viewpoints.length > 0) {
-            console.log(topic.viewpoints[0].perspective_camera)
+    reader.markups.forEach((markup) => {
+        if (markup.viewpoints.length > 0) {
+            console.log(markup.viewpoints[0].perspective_camera)
 
-            const v = topic?.markup?.viewpoints
+            const v = markup?.markup?.viewpoints
 
             if (!v) return
 
-            topic.getViewpointSnapshot(v[0]).then((data) => {
+            markup.getViewpointSnapshot(v[0]).then((data) => {
                 console.log(data)
             })
         }
@@ -29,15 +29,15 @@ const testV30 = async () => {
     await reader.read(file)
 
     reader.markups.forEach((markup) => {
-        if (markup.topic == undefined)
+        if (markup == undefined)
             return
 
-        console.log('markup.topic.title', markup.topic.title)
+        console.log('title', markup.topic.title)
 
         if (markup.viewpoints.length > 0) {
             console.log(markup.viewpoints[0].perspective_camera)
 
-            const v = markup.topic.viewpoints
+            const v = markup.viewpoints
 
             if (!v) return
 

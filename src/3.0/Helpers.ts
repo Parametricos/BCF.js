@@ -1,4 +1,4 @@
-import { IHeader, IMarkup, ITopic } from "./schema"
+import { IHeader, IMarkup, ITopic } from "../schema"
 import { parse } from "fast-xml-parser"
 import {
     Component,
@@ -7,7 +7,7 @@ import {
     ComponentVisibility,
     ViewSetupHints,
     VisualizationInfo
-} from "./schema"
+} from "../schema"
 
 
 export namespace Helpers {

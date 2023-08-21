@@ -1,2 +1,16 @@
-export * from "./BcfReader"
-export * from "./schema"
+import { IHelpers } from "../IHelpers"
+import { Helpers } from "./Helpers"
+import BcfReaderBase from "../BcfReader"
+
+export * from "../schema"
+
+const helpersFunctions: IHelpers = {
+    GetMarkup: Helpers.GetMarkup,
+    GetViewpoint: Helpers.GetViewpoint
+}
+
+export class BcfReader extends BcfReaderBase {
+    constructor() {
+        super("2.1", helpersFunctions)
+    }
+}
