@@ -1,5 +1,5 @@
 const bcfjs21 = require("../dist/2.1")
-const bcfjs30 = require("../dist/3.0")
+const bcfjs30 = require("../dist/")
 const fs = require("fs/promises")
 
 const testV21 = async () => {
@@ -16,6 +16,7 @@ const testV21 = async () => {
             if (!v) return
 
             markup.getViewpointSnapshot(v[0]).then((data) => {
+                if (data)
                 console.log(data)
             })
         }
@@ -42,7 +43,8 @@ const testV30 = async () => {
             if (!v) return
 
             markup.getViewpointSnapshot(v[0]).then((data) => {
-                console.log(data)
+                if (data)
+                    console.log(data)
             })
         }
     })
