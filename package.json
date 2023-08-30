@@ -25,7 +25,8 @@
   "repository": "https://github.com/Nelsonhp3/bcf-js",
   "scripts": {
     "build": "tsc",
-    "example": "node test/BasicReadExample.js",
+    "example-reader": "node test/BasicReadExample.js",
+    "example-writer": "node test/BasicWriteExample.js",
     "build-n-run": "tsc && node test/BasicReadExample.js",
     "test": "jest --watchAll --verbose --silent=false",
     "build-n-test": "tsc && jest --watchAll --verbose --silent=false"
