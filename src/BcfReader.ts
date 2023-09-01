@@ -1,12 +1,14 @@
 import { IViewPoint, ITopic, VisualizationInfo, IHeader } from "./schema"
 import { IHelpers } from "./IHelpers"
 import { Reader, TypedArray, unzip, ZipEntry, ZipInfo } from 'unzipit'
-import { stringify } from "querystring"
+import { IExtensionsSchema, IProject } from "./schema/project"
+import { XMLParser } from "fast-xml-parser"
 
 export default class BcfReader {
 
     version: string
     bcf_archive: ZipInfo | undefined
+    project: IProject | undefined
     markups: Markup[] = []
     helpers: IHelpers
 
@@ -23,9 +25,31 @@ export default class BcfReader {
 
             const { entries } = this.bcf_archive
 
+            let projectId: string = ''
+            let projectName: string = ''
+            let projectVersion: string = ''
+            let extension_schema: IExtensionsSchema | undefined = undefined
+
             for (const [name, entry] of Object.entries(entries)) {
+
                 if (name.endsWith('.bcf')) {
                     markups.push(entry)
+                }
+
+                else if (name.endsWith('.version')) {
+                    const parsedEntry = new XMLParser(this.helpers.XmlParserOptions).parse(await entry.text())
+                    projectVersion = parsedEntry.Version.DetailedVersion
+                }
+
+                else if (name.endsWith('.bcfp')) {
+                    const parsedEntry = new XMLParser(this.helpers.XmlParserOptions).parse(await entry.text())
+                    projectId = parsedEntry.ProjectExtension.Project["@_ProjectId"]
+                    projectName = parsedEntry.ProjectExtension.Project.Name
+                }
+
+                else if (name.endsWith('.xsd')) {
+                    const parsedEntry = new XMLParser(this.helpers.XmlParserOptions).parse(await entry.text())
+                    extension_schema = this.helpers.XmlToJsonNotation(parsedEntry)
                 }
             }
 
@@ -35,6 +59,15 @@ export default class BcfReader {
                 await markup.read()
                 this.markups.push(markup)
             }
+
+            this.project = {
+                project_id: projectId,
+                name: projectName,
+                version: projectVersion,
+                markups: this.markups,
+                extension_schema: extension_schema
+            }
+
         } catch (e) {
             console.log("Error in loading BCF archive. The error below was thrown.")
             console.error(e)
@@ -44,6 +77,7 @@ export default class BcfReader {
     getEntry = (name: string) => {
         return this.bcf_archive?.entries[name]
     }
+
 }
 
 export class Markup {
