@@ -1,28 +1,17 @@
 import { IComment, IMarkup, IViewPoint } from "../schema"
-import parser from "fast-xml-parser"
-import {
-    Component,
-    ComponentColoring,
-    Components,
-    ComponentVisibility,
-    ViewSetupHints,
-    VisualizationInfo
-} from "../schema"
+import { XMLParser } from "fast-xml-parser"
+import * as SharedHelpers from '../SharedHelpers'
 
 export namespace Helpers {
 
-    const xmlParserOptions = {
-        attributeNamePrefix: "@_",
-        ignoreAttributes: false,
-        ignoreNameSpace: true,
-        allowBooleanAttributes: true,
-        parseNodeValue: true,
-        parseAttributeValue: true,
-        trimValues: true,
-    }
+    export const XmlParserOptions = SharedHelpers.XmlParserOptions
+    export const XmlBuilderOptions = SharedHelpers.XmlBuilderOptions
+    export const GetViewpoint = SharedHelpers.GetViewpoint
+    export const XmlToJsonNotation = SharedHelpers.XmlToJsonNotation
+    const ChangeToUppercase = SharedHelpers.ChangeToUppercase
 
     export function GetMarkup(xmlString: any): IMarkup {
-        const { Markup } = parser.parse(xmlString, xmlParserOptions)
+        const { Markup } = new XMLParser(XmlParserOptions).parse(xmlString)
 
         return {
             topic: {
@@ -44,115 +33,6 @@ export namespace Helpers {
                 // related_topics: Markup.ITopic["ReferenceLink"],
                 comments: Helpers.GetComments(Markup.Comment),
                 viewpoints: Helpers.GetViewpoints(Markup.Viewpoints)
-            },
-        }
-    }
-
-    export function GetVisInfoComponent(xmlData: any): Component {
-        return {
-            ifc_guid: xmlData["@_IfcGuid"]
-        }
-    }
-
-    export function GetViewpoint(xmlString: any): VisualizationInfo {
-        const { VisualizationInfo } = parser.parse(xmlString, xmlParserOptions)
-        const Vis = VisualizationInfo
-
-        //Camera
-        const orthogonal_camera = Vis["OrthogonalCamera"]
-        const perspective_camera = Vis["PerspectiveCamera"]
-
-        //Extras
-        const lines = Vis["Lines"]
-        const clipping_planes = Vis["ClippingPlanes"]
-
-        const GetComponents = (): Components | undefined => {
-
-            if (!Vis["Components"]) return undefined
-            const components = Vis["Components"]
-
-            const GetViewSetupHints = (): ViewSetupHints | undefined => {
-
-                if (!components["ViewSetupHints"]) return undefined
-                const view_setup_hints = components["ViewSetupHints"]
-
-                return {
-                    spaces_visible: view_setup_hints["@_SpacesVisible"],
-                    spaces_boundaries_visible: view_setup_hints["@_SpacesBoundariesVisible"],
-                    openings_visible: view_setup_hints["@_OpeningsVisible"]
-                }
-            }
-
-            const GetVisibility = (): ComponentVisibility => {
-                if (!components["Visibility"])
-                    throw new Error("Visibility not found.")
-
-                const visibility = components["Visibility"]
-                return {
-                    default_visibility: visibility["@_DefaultVisibility"],
-                    exceptions:
-                        visibility["Exceptions"] &&
-                        visibility["Exceptions"]["Component"] &&
-                        Helpers.ObjectToArray(visibility["Exceptions"]["Component"])?.map((exception: any) => {
-                            return Helpers.GetVisInfoComponent(exception)
-                        })
-                }
-            }
-
-            const GetSelection = (): Component[] | undefined => {
-                if (!components["Selection"]) return undefined
-
-                const selection = components["Selection"]
-                const arr = Helpers.ObjectToArray(selection["Component"])
-                return arr?.map((exception: any) => {
-                    return Helpers.GetVisInfoComponent(exception)
-                })
-            }
-
-            const GetColoring = (): ComponentColoring[] | undefined => {
-
-                if (!components["Coloring"]) return undefined
-                const coloring = components["Coloring"]
-
-                const colors = coloring["Color"]
-                if (!colors) return undefined
-
-                return Helpers.ObjectToArray(colors).map((color: any) => (
-                    {
-                        color: color["@_Color"],
-                        components: Helpers.ObjectToArray(color["Component"])
-                            .map((exception: any) => {
-                                return Helpers.GetVisInfoComponent(exception)
-                            })
-                    }
-                )
-                )
-            }
-
-            return {
-                view_setup_hints: GetViewSetupHints(),
-                visibility: GetVisibility(),
-                selection: GetSelection(),
-                coloring: GetColoring()
-            }
-        }
-
-        // Helpers.WriteJsonToFile("./parsed/viewpoint" + Vis["@_Guid"] + ".json", Vis);
-
-        return {
-            guid: Vis["@_Guid"],
-            components: GetComponents(),
-            orthogonal_camera: orthogonal_camera && {
-                camera_view_point: ParsePoint(orthogonal_camera["CameraViewPoint"]),
-                camera_direction: ParsePoint(orthogonal_camera["CameraDirection"]),
-                camera_up_vector: ParsePoint(orthogonal_camera["CameraUpVector"]),
-                view_to_world_scale: orthogonal_camera["ViewToWorldScale"]
-            },
-            perspective_camera: perspective_camera && {
-                camera_view_point: ParsePoint(perspective_camera["CameraViewPoint"]),
-                camera_direction: ParsePoint(perspective_camera["CameraDirection"]),
-                camera_up_vector: ParsePoint(perspective_camera["CameraUpVector"]),
-                field_of_view: perspective_camera["FieldOfView"]
             },
         }
     }
@@ -226,5 +106,86 @@ export namespace Helpers {
             y: point.Y,
             z: point.Z
         }
+    }
+
+    const version21PluralWordsToSingular = [
+        "DocumentReferences",
+        "RelatedTopics"
+    ]
+
+    export function MarkupToXmlNotation(markup: any): any {
+        const convertedMarkup = convert21To30(markup)
+
+        let purgedMarkup = {
+            "Markup": {
+                "@_xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+                "@_xmlns:xsd": "http://www.w3.org/2001/XMLSchema",
+                "header": convertedMarkup.header,
+                "topic": convertedMarkup.topic,
+                "comment": convertedMarkup.comment,
+                "viewpoints": convertedMarkup.viewpoints
+            }
+        }
+
+        return renameJsonKeys(purgedMarkup)
+    }
+
+    function renameJsonKeys(obj: any) {
+        let outputObj: any = {}
+
+        if (typeof obj === 'string')
+            return obj
+
+        for (const key in obj) {
+
+            let value = obj[key]
+
+            if (!value)
+                continue
+
+            if (key.startsWith('@_')) {
+                outputObj[key] = value
+                continue
+            }
+
+            let newKey = ChangeToUppercase(key)
+
+            if (Array.isArray(value)) {
+                const newArrNode: any[] = []
+                for (const child of value)
+                    newArrNode.push(renameJsonKeys(child))
+
+                const pluralWord = version21PluralWordsToSingular.find(word => word.startsWith(newKey))
+                if (pluralWord)
+                    newKey = pluralWord.slice(0, -1)
+
+                outputObj[newKey] = newArrNode
+                continue
+            }
+
+            if (typeof value === 'object')
+                value = renameJsonKeys(value)
+
+            outputObj[newKey] = value
+        }
+
+        return outputObj
+    }
+
+    function convert21To30(markup: IMarkup): any {
+
+        if (!markup.topic)
+            return
+
+        const { comments, viewpoints, ...topic } = markup.topic
+
+        const newMarkup = {
+            header: { file: markup.header?.files },
+            topic: topic,
+            comment: comments,
+            viewpoints: viewpoints
+        }
+
+        return newMarkup
     }
 }

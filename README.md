@@ -1,9 +1,8 @@
 # BCF-js
 
-bcf-js is a [BIM Collaboration Format](https://technical.buildingsmart.org/standards/bcf/ "BIM Collaboration Format") (BCF) reader & parser.
+Bcf-js is a [BIM Collaboration Format](https://technical.buildingsmart.org/standards/bcf/ "BIM Collaboration Format") (BCF) reader & parser.
 
-This fork was made to read both BCF 2.1 and 3.0 versions.
-Futurely will also convert versions and write BCFs.
+This fork was made to read and write both BCF 2.1 and 3.0 versions.
 
 Find it on npmjs.com https://www.npmjs.com/package/@nelsonhp3/bcf-js
 
@@ -15,13 +14,14 @@ To install the library use:
 
 For BCF-XML 3.0:
 ``` javascript
-import { BcfReader } from '@nelsonhp3/bcf-js';
+import { BcfReader, BcfWriter } from '@nelsonhp3/bcf-js';
 ```
 For BCF-XML 2.1:
 ``` javascript
-import { BcfReader } from '@nelsonhp3/bcf-js/2.1';
+import { BcfReader, BcfWriter } from '@nelsonhp3/bcf-js/2.1';
 ```
-Reading a file:
+
+### Reading a file:
 
 ``` javascript
   const file = "some_bcf_file.bcf"
@@ -33,7 +33,19 @@ Reading a file:
   reader.markups.forEach((markup) => {
     console.log(markup.topic);
   })
+```
+
+### Writing a project:
+
+``` typescript
+  const bcfProject: IProject = {
+    ...
+  }
+  const savePath = "./test-data/bcf3.0/Writer/WriteTest.bcf"
+
+  const writer = new BcfWriter();
   
+  await writer.write(bcfProject, savePath);
 ```
 
 ## Contribution
@@ -44,8 +56,6 @@ There's a few ways to contribute to this project and improve it:
 
 ## Developed
 BCF-js is developed and maintained by [Parametricos Ltd.](https://parametricos.com "Parametricos Ltd.") for [Studio 3DX](https://studio3dx.com "Studio 3DX.") and was open sourced on the 26th of May 2021 in the name of BIM and it's community!
-### Join Parametricos Community
-Ask us to invite you to our Slack Channels or join our newly created community on [Discord](https://discord.gg/qcTMXVa44S)
 
 ## License
 BCF-js is licensed under the [Mozilla Public License 2.0](https://github.com/Parametricos/bcf-js/blob/6110f8ec70f86dbe1b3644441e5ca8935843d233/LICENSE "Mozilla Public License 2.0"). Please read the LICENSE file in this repository for more details. 
