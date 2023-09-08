@@ -1,9 +1,17 @@
 const bcfjs21 = require("../dist/2.1")
 const bcfjs30 = require("../dist")
-const fs = require("fs/promises")
+const fs = require("fs")
+
+const writeFile = async (content, filePath) => {
+    const lastSlashIndex = filePath.lastIndexOf('/')
+    const folderPath = filePath.substring(0, lastSlashIndex)
+    if (!fs.existsSync(folderPath))
+        fs.mkdirSync(folderPath)
+    fs.writeFile(filePath, content, (err) => { if (err) console.log("Error on write file: ", err) })
+}
 
 const testV21 = async () => {
-    const file = await fs.readFile("./test-data/bcf2.1/MaximumInformation.bcf")
+    const file = fs.readFileSync("./test-data/bcf2.1/MaximumInformation.bcf")
     const reader = new bcfjs21.BcfReader()
     await reader.read(file)
 
@@ -25,11 +33,12 @@ const testV21 = async () => {
         })
     }
 
-    await writer.write(bcfproject, "./test-data/bcf2.1/Writer/WriterTest.bcf")
+    const buffer = await writer.write(bcfproject)
+    await writeFile(buffer, "./test-data/bcf2.1/Writer/WriterTest.bcf")
 }
 
 const testV30 = async () => {
-    const file = await fs.readFile("./test-data/bcf3.0/MaximumInformation.bcf")
+    const file = fs.readFileSync("./test-data/bcf3.0/MaximumInformation.bcf")
     const reader = new bcfjs30.BcfReader()
     await reader.read(file)
 
@@ -51,7 +60,8 @@ const testV30 = async () => {
         })
     }
 
-    await writer.write(bcfproject, "./test-data/bcf3.0/Writer/WriterTest.bcf")
+    const buffer = await writer.write(bcfproject)
+    await writeFile(buffer, "./test-data/bcf3.0/Writer/WriterTest.bcf")
 }
 
 testV21()

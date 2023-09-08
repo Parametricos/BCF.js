@@ -1,7 +1,6 @@
 import JSZip from "jszip"
 import { IProject } from "./schema"
 import { IHelpers } from "./IHelpers"
-import { existsSync, mkdirSync, writeFile } from "fs"
 import { XMLBuilder } from "fast-xml-parser"
 
 export default class BcfWriter {
@@ -24,11 +23,11 @@ export default class BcfWriter {
         this.files.push(file)
     }
 
-    write = async (project: IProject, filePath: string) => {
+    write = async (project: IProject): Promise<Buffer | undefined> => {
         try {
             this.project = project
             createEntries(this, project.markups)
-            await exportZip(this.files, filePath)
+            return await exportZip(this.files)
         } catch (e) {
             console.log("Error in writing BCF archive. The error below was thrown.")
             console.error(e)
@@ -61,10 +60,7 @@ function createEntries(writer: BcfWriter, markups: any) {
     }
 }
 
-async function exportZip(files: IFile[], filePath: string) {
-    if (!filePath)
-        throw new Error("Error on File Path")
-
+async function exportZip(files: IFile[]): Promise<Buffer> {
     var zip = new JSZip()
 
     for (const file of files) {
@@ -79,12 +75,7 @@ async function exportZip(files: IFile[], filePath: string) {
             zip.folder(fullPath[0])?.file(fullPath[1], file.content)
     }
 
-    const content = await zip.generateAsync({ type: "nodebuffer" })
-    const lastSlashIndex = filePath.lastIndexOf('/')
-    const folderPath = filePath.substring(0, lastSlashIndex)
-    if (!existsSync(folderPath))
-        mkdirSync(folderPath)
-    writeFile(filePath, content, (err) => { if (err) console.log("Error on write file: ", err) })
+    return await zip.generateAsync({ type: "nodebuffer" })
 }
 
 function bcfversion(version: string): IFile {
