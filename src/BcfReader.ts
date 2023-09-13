@@ -65,6 +65,7 @@ export default class BcfReader {
                 name: projectName,
                 version: projectVersion,
                 markups: this.markups,
+                reader: this,
                 extension_schema: extension_schema
             }
 
@@ -87,7 +88,7 @@ export class Markup {
 
     header: IHeader | undefined
     topic: ITopic | undefined
-    viewpoints: VisualizationInfo[] = [];
+    viewpoints: VisualizationInfo[] = []
 
     constructor(reader: BcfReader, markup: ZipEntry) {
         this.reader = reader
@@ -120,16 +121,23 @@ export class Markup {
                 if (!file) throw new Error("Missing Visualization Info")
 
                 const viewpoint = this.reader.helpers.GetViewpoint(await file.text())
+                viewpoint.snapshot = entry.snapshot
                 this.viewpoints.push(viewpoint)
             }
         }
     }
 
-    getViewpointSnapshot = async (viewpoint: IViewPoint): Promise<ArrayBuffer | undefined> => {
+    /**
+ * Parses the png snapshot.
+ *
+ * @returns {string} The image in base64String format.
+ */
+    getViewpointSnapshot = async (viewpoint: IViewPoint): Promise<string | undefined> => {
         if (!viewpoint || !this.topic) return
         const entry = this.reader.getEntry(`${this.topic.guid}/${viewpoint.snapshot}`)
         if (entry) {
-            return await entry.arrayBuffer()
+            const arrayBuffer = await entry.arrayBuffer()
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer) as any))
         }
     }
 }

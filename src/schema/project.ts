@@ -5,6 +5,7 @@ export interface IProject {
     name: string
     version: string
     markups?: IMarkup[]
+    reader: any
     extension_schema: IExtensionsSchema | undefined
 }
 

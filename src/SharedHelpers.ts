@@ -152,7 +152,7 @@ export function GetViewpoint(xmlString: any): VisualizationInfo {
             camera_direction: ParsePoint(perspective_camera["CameraDirection"]),
             camera_up_vector: ParsePoint(perspective_camera["CameraUpVector"]),
             field_of_view: perspective_camera["FieldOfView"]
-        },
+        }
     }
 }
 
