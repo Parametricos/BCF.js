@@ -1,6 +1,12 @@
+import { IProject } from "./project"
+import { VisualizationInfo } from "./viewpoint"
+
 export interface IMarkup {
     header?: IHeader
     topic: ITopic | undefined
+    project?: IProject
+    viewpoints?: VisualizationInfo[]
+    getViewpointSnapshot?(viewpoint: VisualizationInfo | IViewPoint): Promise<string | undefined>
 }
 
 export interface IHeader {

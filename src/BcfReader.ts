@@ -1,4 +1,4 @@
-import { IViewPoint, ITopic, VisualizationInfo, IHeader } from "./schema"
+import { IViewPoint, ITopic, VisualizationInfo, IHeader, IMarkup } from "./schema"
 import { IHelpers } from "./IHelpers"
 import { Reader, TypedArray, unzip, ZipEntry, ZipInfo } from 'unzipit'
 import { IExtensionsSchema, IProject } from "./schema/project"
@@ -53,21 +53,29 @@ export default class BcfReader {
                 }
             }
 
+            const purged_markups: IMarkup[] = []
+
+            //Todo: Bug with reading header in v2.1
             for (let i = 0; i < markups.length; i++) {
                 const t = markups[i]
                 const markup = new Markup(this, t)
                 await markup.read()
                 this.markups.push(markup)
+
+                const purged_markup = { header: markup.header, topic: markup.topic, project: this.project, viewpoints: markup.viewpoints, getViewpointSnapshot: markup.getViewpointSnapshot } as IMarkup
+                purged_markups.push(purged_markup)
             }
 
             this.project = {
                 project_id: projectId,
                 name: projectName,
                 version: projectVersion,
-                markups: this.markups,
+                markups: undefined,
                 reader: this,
                 extension_schema: extension_schema
             }
+
+            this.project.markups = purged_markups.map(mkp => { return { ...mkp, project: this.project } as IMarkup })
 
         } catch (e) {
             console.log("Error in loading BCF archive. The error below was thrown.")
@@ -132,7 +140,7 @@ export class Markup {
  *
  * @returns {string} The image in base64String format.
  */
-    getViewpointSnapshot = async (viewpoint: IViewPoint): Promise<string | undefined> => {
+    getViewpointSnapshot = async (viewpoint: VisualizationInfo | IViewPoint): Promise<string | undefined> => {
         if (!viewpoint || !this.topic) return
         const entry = this.reader.getEntry(`${this.topic.guid}/${viewpoint.snapshot}`)
         if (entry) {
