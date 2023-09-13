@@ -6,6 +6,7 @@ export interface VisualizationInfo {
     perspective_camera?: PerspectiveCamera,
     lines?: Line[],
     clipping_planes?: ClippingPlane[],
+    getSnapshot?(): Promise<string | undefined>
     // bitmaps?: Bitmap[]
 }
 

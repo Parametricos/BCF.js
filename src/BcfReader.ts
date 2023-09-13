@@ -55,14 +55,14 @@ export default class BcfReader {
 
             const purged_markups: IMarkup[] = []
 
-            //Todo: Bug with reading header in v2.1
+            //TODO: Bug with reading header in v2.1
             for (let i = 0; i < markups.length; i++) {
                 const t = markups[i]
                 const markup = new Markup(this, t)
                 await markup.read()
                 this.markups.push(markup)
 
-                const purged_markup = { header: markup.header, topic: markup.topic, project: this.project, viewpoints: markup.viewpoints, getViewpointSnapshot: markup.getViewpointSnapshot } as IMarkup
+                const purged_markup = { header: markup.header, topic: markup.topic, project: this.project, viewpoints: markup.viewpoints } as IMarkup
                 purged_markups.push(purged_markup)
             }
 
@@ -130,19 +130,39 @@ export class Markup {
 
                 const viewpoint = this.reader.helpers.GetViewpoint(await file.text())
                 viewpoint.snapshot = entry.snapshot
+                viewpoint.getSnapshot = async () => { if (entry.snapshot) return await this.getSnapshot(entry.snapshot) }
+
                 this.viewpoints.push(viewpoint)
             }
         }
     }
 
     /**
- * Parses the png snapshot.
- *
- * @returns {string} The image in base64String format.
- */
+     * Parses the png snapshot.
+     * 
+     * @returns {string} The image in base64String format.
+     * 
+     * @deprecated This function is deprecated and will be removed in the next version.<br>
+     * Please use viewpoint.getSnapshot() instead.<br>
+     *
+    */
     getViewpointSnapshot = async (viewpoint: VisualizationInfo | IViewPoint): Promise<string | undefined> => {
         if (!viewpoint || !this.topic) return
         const entry = this.reader.getEntry(`${this.topic.guid}/${viewpoint.snapshot}`)
+        if (entry) {
+            const arrayBuffer = await entry.arrayBuffer()
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer) as any))
+        }
+    }
+
+    /**
+     * Parses the png snapshot.
+     *
+     * @returns {string} The image in base64String format.
+    */
+    getSnapshot = async (guid: string): Promise<string | undefined> => {
+        if (!guid || !this.topic) return
+        const entry = this.reader.getEntry(`${this.topic.guid}/${guid}`)
         if (entry) {
             const arrayBuffer = await entry.arrayBuffer()
             return btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer) as any))

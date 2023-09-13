@@ -22,9 +22,9 @@ const testV21 = async () => {
 
             if (!v) return
 
-            markup.getViewpointSnapshot(v[0]).then((data) => {
-                if (data)
-                    console.log('base64String image data: ', data)
+            v[0].getSnapshot().then(img => {
+                if (img)
+                    console.log('base64String image data: ', img)
             })
         }
     })
@@ -50,9 +50,9 @@ const testV30 = async () => {
 
             if (!v) return
 
-            markup.getViewpointSnapshot(v[0]).then((data) => {
-                if (data)
-                    console.log('base64String image data: ', data)
+            v[0].getSnapshot().then(img => {
+                if (img)
+                    console.log('base64String image data: ', img)
             })
         }
     })

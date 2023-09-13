@@ -6,7 +6,6 @@ export interface IMarkup {
     topic: ITopic | undefined
     project?: IProject
     viewpoints?: VisualizationInfo[]
-    getViewpointSnapshot?(viewpoint: VisualizationInfo | IViewPoint): Promise<string | undefined>
 }
 
 export interface IHeader {
