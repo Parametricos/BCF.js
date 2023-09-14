@@ -43,11 +43,15 @@ export default class BcfReader {
 
                 else if (name.endsWith('.bcfp')) {
                     const parsedEntry = new XMLParser(this.helpers.XmlParserOptions).parse(await entry.text())
-                    projectId = parsedEntry.ProjectExtension.Project["@_ProjectId"]
-                    projectName = parsedEntry.ProjectExtension.Project.Name
+
+                    if (!parsedEntry.ProjectExtension || !parsedEntry.ProjectExtension.Project)
+                        continue //NOTE: Throw an error here?
+
+                    projectId = parsedEntry.ProjectExtension.Project["@_ProjectId"] || '' //NOTE: Throw an error here?
+                    projectName = parsedEntry.ProjectExtension.Project.Name || ''
                 }
 
-                else if (name.endsWith('.xsd')) {
+                else if (name.endsWith('extensions.xsd')) {
                     const parsedEntry = new XMLParser(this.helpers.XmlParserOptions).parse(await entry.text())
                     extension_schema = this.helpers.XmlToJsonNotation(parsedEntry)
                 }
@@ -55,7 +59,6 @@ export default class BcfReader {
 
             const purged_markups: IMarkup[] = []
 
-            //TODO: Bug with reading header in v2.1
             for (let i = 0; i < markups.length; i++) {
                 const t = markups[i]
                 const markup = new Markup(this, t)

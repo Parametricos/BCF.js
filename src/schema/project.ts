@@ -9,7 +9,13 @@ export interface IProject {
     extension_schema: IExtensionsSchema | undefined
 }
 
+//TODO: Simplify this schema
 export interface IExtensionsSchema {
+    "?xml": {
+        version: string,
+        encoding: string,
+        standalone: string
+    }
     schema: {
         xmlns: string
         redefine: {

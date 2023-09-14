@@ -1,7 +1,7 @@
 {
   "name": "@nelsonhp3/bcf-js",
   "description": "bcf-js is a BIM Collaboration Format (BCF) reader & parser.",
-  "version": "0.2.2",
+  "version": "0.2.5",
   "main": "dist/index.js",
   "type": "commonjs",
   "keywords": [

@@ -4,7 +4,7 @@ import * as SharedHelpers from '../SharedHelpers'
 
 export namespace Helpers {
 
-    export const XmlParserOptions = {...SharedHelpers.XmlParserOptions, oneListGroup: true}
+    export const XmlParserOptions = { ...SharedHelpers.XmlParserOptions, oneListGroup: true }
     export const XmlBuilderOptions = SharedHelpers.XmlBuilderOptions
     export const GetViewpoint = SharedHelpers.GetViewpoint
     export const XmlToJsonNotation = SharedHelpers.XmlToJsonNotation
@@ -31,14 +31,16 @@ export namespace Helpers {
             }
         }
 
-        return renameJsonKeys(purgedMarkup)
+        return RenameJsonKeys(purgedMarkup)
     }
 
-    function renameJsonKeys(obj: any) {
+    export function RenameJsonKeys(obj: any, options?: any) {
         let outputObj: any = {}
 
         if (typeof obj === 'string')
             return obj
+
+        const opt_plural_to_singular = options?.plural_to_singular !== undefined ? options.plural_to_singular : true
 
         for (const key in obj) {
 
@@ -52,13 +54,19 @@ export namespace Helpers {
                 continue
             }
 
-            let newKey = ChangeToUppercase(key)
+            let newKey = ChangeToUppercase(key, options)
 
             if (Array.isArray(value)) {
                 const newArrNode: any[] = []
                 for (const child of value) {
                     let newChild: any = {}
-                    newChild[newKey.slice(0, -1)] = renameJsonKeys(child)
+                    let childKey = newKey
+
+                    if (opt_plural_to_singular)
+                        childKey = childKey.slice(0, -1)
+
+                    newChild[childKey] = RenameJsonKeys(child, options)
+
                     newArrNode.push(newChild)
                 }
                 outputObj[newKey] = newArrNode
@@ -66,7 +74,7 @@ export namespace Helpers {
             }
 
             if (typeof value === 'object')
-                value = renameJsonKeys(value)
+                value = RenameJsonKeys(value, options)
 
             outputObj[newKey] = value
         }
