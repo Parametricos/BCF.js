@@ -41,7 +41,6 @@ build/Release
 node_modules/
 jspm_packages/
 package-lock.json
-yarn.lock
 
 # TypeScript v1 declaration files
 typings/
@@ -110,3 +109,13 @@ dist
 # VsCode
 BCF-js.code-workspace
 .vscode/
+
+
+# Yarn
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
