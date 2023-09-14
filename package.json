@@ -1,7 +1,7 @@
 {
   "name": "@parametricos/bcf-js",
   "description": "BCF.js is a BIM Collaboration Format (BCF) reader & parser.",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "main": "dist/index.js",
   "type": "commonjs",
   "keywords": [
