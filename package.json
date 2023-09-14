@@ -1,6 +1,6 @@
 {
   "name": "@parametricos/bcf-js",
-  "description": "bcf-js is a BIM Collaboration Format (BCF) reader & parser.",
+  "description": "BCF.js is a BIM Collaboration Format (BCF) reader & parser.",
   "version": "0.2.5",
   "main": "dist/index.js",
   "type": "commonjs",
@@ -14,15 +14,15 @@
     "writer"
   ],
   "bugs": {
-    "url": "https://github.com/Parametricos/bcf-js/issues"
+    "url": "https://github.com/Parametricos/BCF.js/issues"
   },
   "license": "MPL-2.0",
   "author": {
     "name": "Harry Collin",
     "email": "hc@parametricos.com"
   },
-  "homepage": "https://github.com/Parametricos/bcf-js#readme",
-  "repository": "https://github.com/Parametricos/bcf-js",
+  "homepage": "https://github.com/Parametricos/BCF.js#readme",
+  "repository": "https://github.com/Parametricos/BCF.js",
   "scripts": {
     "build": "tsc",
     "example-reader": "node test/BasicReadExample.js",
