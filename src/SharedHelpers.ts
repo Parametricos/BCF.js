@@ -14,7 +14,6 @@ export const XmlParserOptions = {
     ignoreAttributes: false,
     ignoreNameSpace: true,
     allowBooleanAttributes: true,
-    parseAttributeValue: true,
     trimValues: true,
 }
 
@@ -65,6 +64,7 @@ export function GetViewpoint(xmlString: any): VisualizationInfo {
     const perspective_camera = Vis["PerspectiveCamera"]
 
     //Extras
+    //NOTE: Keep this?
     const lines = Vis["Lines"]
     const clipping_planes = Vis["ClippingPlanes"]
 
@@ -152,32 +152,8 @@ export function GetViewpoint(xmlString: any): VisualizationInfo {
             camera_direction: ParsePoint(perspective_camera["CameraDirection"]),
             camera_up_vector: ParsePoint(perspective_camera["CameraUpVector"]),
             field_of_view: perspective_camera["FieldOfView"]
-        },
-    }
-}
-
-export function FixArraysNodes(value: any) {
-    let result: any = {}
-
-    if (typeof value === 'string' || typeof value === 'number' || Array.isArray(value))
-        return value
-
-    for (const child in value) {
-        if (!arrayProps.includes(child)) {
-            result[child] = value[child]
-            continue
         }
-
-        result[child] = []
-        const val = Object.values(value[child])[0]
-
-        if (Array.isArray(val))
-            result[child] = val
-        else
-            result[child].push(val)
     }
-
-    return result
 }
 
 export function XmlToJsonNotation(node: any) {
@@ -209,6 +185,30 @@ export function XmlToJsonNotation(node: any) {
     return outputNode
 }
 
+export function FixArraysNodes(value: any) {
+    let result: any = {}
+
+    if (typeof value === 'string' || typeof value === 'number' || Array.isArray(value))
+        return value
+
+    for (const child in value) {
+        if (!arrayProps.includes(child)) {
+            result[child] = value[child]
+            continue
+        }
+
+        result[child] = []
+        const val = Object.values(value[child])[0]
+
+        if (Array.isArray(val))
+            result[child] = val
+        else
+            result[child].push(val)
+    }
+
+    return result
+}
+
 /**
  * Returns an object as an array
  * Can also accept array and returns new array if type is unknown
@@ -228,27 +228,40 @@ export function ParsePoint(point: any) {
     }
 }
 
-export function ChangeToUppercase(key: string): string {
+export function ChangeToUppercase(key: string, options: any = {}): string {
+    const opt_firstletter_uppercase = options.firstletter_uppercase !== undefined ? options.firstletter_uppercase : true
+
     let newKey: string[] = []
 
-    const charToFind = '_'
     let chars = key.split('')
 
     for (let i = 0; i < chars.length; i++) {
 
-        if (chars[i] === charToFind) {
+        if (chars[i] === '_') {
             newKey.push(chars[i + 1].toUpperCase())
             i++
         }
-        else if (i == 0)
+        else if (i == 0 && opt_firstletter_uppercase)
             newKey.push(chars[i].toUpperCase())
         else
             newKey.push(chars[i])
     }
     let output = newKey.join("")
 
-    if (attributes.includes(output))
+    if (isAttribute(output, options))
         output = `@_${output}`
 
     return output
+}
+
+function isAttribute(output: string, options: any): boolean {
+    const opt_additional_attributes = options.additional_attributes || []
+
+    if (output.startsWith('?xml') || output.startsWith('xs:'))
+        return false
+
+    if (attributes.includes(output) || opt_additional_attributes.includes(output))
+        return true
+
+    return false
 }

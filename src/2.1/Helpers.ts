@@ -1,4 +1,4 @@
-import { IComment, IMarkup, IViewPoint } from "../schema"
+import { IComment, IFile, IMarkup, IViewPoint } from "../schema"
 import { XMLParser } from "fast-xml-parser"
 import * as SharedHelpers from '../SharedHelpers'
 
@@ -14,6 +14,9 @@ export namespace Helpers {
         const { Markup } = new XMLParser(XmlParserOptions).parse(xmlString)
 
         return {
+            header: {
+                files: getHeaderFiles(Markup.Header)
+            },
             topic: {
                 guid: Markup.Topic['@_Guid'],
                 topic_type: Markup.Topic["@_TopicType"],
@@ -127,14 +130,16 @@ export namespace Helpers {
             }
         }
 
-        return renameJsonKeys(purgedMarkup)
+        return RenameJsonKeys(purgedMarkup)
     }
 
-    function renameJsonKeys(obj: any) {
+    export function RenameJsonKeys(obj: any, options?: any) {
         let outputObj: any = {}
 
         if (typeof obj === 'string')
             return obj
+
+        const opt_plural_to_singular = options?.plural_to_singular !== undefined ? options.plural_to_singular : true
 
         for (const key in obj) {
 
@@ -148,15 +153,15 @@ export namespace Helpers {
                 continue
             }
 
-            let newKey = ChangeToUppercase(key)
+            let newKey = ChangeToUppercase(key, options)
 
             if (Array.isArray(value)) {
                 const newArrNode: any[] = []
                 for (const child of value)
-                    newArrNode.push(renameJsonKeys(child))
+                    newArrNode.push(RenameJsonKeys(child, options))
 
                 const pluralWord = version21PluralWordsToSingular.find(word => word.startsWith(newKey))
-                if (pluralWord)
+                if (pluralWord && opt_plural_to_singular)
                     newKey = pluralWord.slice(0, -1)
 
                 outputObj[newKey] = newArrNode
@@ -164,12 +169,17 @@ export namespace Helpers {
             }
 
             if (typeof value === 'object')
-                value = renameJsonKeys(value)
+                value = RenameJsonKeys(value, options)
 
             outputObj[newKey] = value
         }
 
         return outputObj
+    }
+
+    function getHeaderFiles(header: any): IFile[] | undefined {
+        if (header)
+            return Helpers.ObjectToArray(header).map((file: any) => XmlToJsonNotation(file))
     }
 
     function convert21To30(markup: IMarkup): any {

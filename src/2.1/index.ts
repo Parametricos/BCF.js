@@ -10,6 +10,7 @@ const helpersFunctions: IHelpers = {
     GetViewpoint: Helpers.GetViewpoint,
     XmlToJsonNotation: Helpers.XmlToJsonNotation,
     MarkupToXmlNotation: Helpers.MarkupToXmlNotation,
+    RenameJsonKeys: Helpers.RenameJsonKeys,
     XmlParserOptions: Helpers.XmlParserOptions,
     XmlBuilderOptions: Helpers.XmlBuilderOptions
 }

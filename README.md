@@ -29,10 +29,14 @@ import { BcfReader, BcfWriter } from '@parametricos/bcf-js/2.1';
   const reader = new BcfReader();
   
   await reader.read(file);
+
+  const project = reader.project
   
-  reader.markups.forEach((markup) => {
+  project.markups.forEach((markup) => {
     console.log(markup.topic);
   })
+
+  // See ./test/BasicReadExample.js for more examples
 ```
 
 ### Writing a project:
@@ -41,11 +45,15 @@ import { BcfReader, BcfWriter } from '@parametricos/bcf-js/2.1';
   const bcfProject: IProject = {
     ...
   }
+  
   const savePath = "./test-data/bcf3.0/Writer/WriteTest.bcf"
 
   const writer = new BcfWriter();
   
-  await writer.write(bcfProject, savePath);
+  const content = await writer.write(bcfproject)
+  fs.writeFile(savePath, content, (err) => {})
+
+  // See ./test/BasicWriteExample.js for more examples
 ```
 
 ## Contribution

@@ -1,6 +1,11 @@
+import { IProject } from "./project"
+import { VisualizationInfo } from "./viewpoint"
+
 export interface IMarkup {
     header?: IHeader
     topic: ITopic | undefined
+    project?: IProject
+    viewpoints?: VisualizationInfo[]
 }
 
 export interface IHeader {

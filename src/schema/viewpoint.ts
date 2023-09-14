@@ -1,10 +1,12 @@
 export interface VisualizationInfo {
     guid: string
+    snapshot?: string
     components?: Components,
     orthogonal_camera?: OrthogonalCamera,
     perspective_camera?: PerspectiveCamera,
     lines?: Line[],
     clipping_planes?: ClippingPlane[],
+    getSnapshot?(): Promise<string | undefined>
     // bitmaps?: Bitmap[]
 }
 

@@ -1,4 +1,4 @@
-import { IViewPoint, ITopic, VisualizationInfo, IHeader } from "./schema"
+import { IViewPoint, ITopic, VisualizationInfo, IHeader, IMarkup } from "./schema"
 import { IHelpers } from "./IHelpers"
 import { Reader, TypedArray, unzip, ZipEntry, ZipInfo } from 'unzipit'
 import { IExtensionsSchema, IProject } from "./schema/project"
@@ -43,30 +43,42 @@ export default class BcfReader {
 
                 else if (name.endsWith('.bcfp')) {
                     const parsedEntry = new XMLParser(this.helpers.XmlParserOptions).parse(await entry.text())
-                    projectId = parsedEntry.ProjectExtension.Project["@_ProjectId"]
-                    projectName = parsedEntry.ProjectExtension.Project.Name
+
+                    if (!parsedEntry.ProjectExtension || !parsedEntry.ProjectExtension.Project)
+                        continue //NOTE: Throw an error here?
+
+                    projectId = parsedEntry.ProjectExtension.Project["@_ProjectId"] || '' //NOTE: Throw an error here?
+                    projectName = parsedEntry.ProjectExtension.Project.Name || ''
                 }
 
-                else if (name.endsWith('.xsd')) {
+                else if (name.endsWith('extensions.xsd')) {
                     const parsedEntry = new XMLParser(this.helpers.XmlParserOptions).parse(await entry.text())
                     extension_schema = this.helpers.XmlToJsonNotation(parsedEntry)
                 }
             }
+
+            const purged_markups: IMarkup[] = []
 
             for (let i = 0; i < markups.length; i++) {
                 const t = markups[i]
                 const markup = new Markup(this, t)
                 await markup.read()
                 this.markups.push(markup)
+
+                const purged_markup = { header: markup.header, topic: markup.topic, project: this.project, viewpoints: markup.viewpoints } as IMarkup
+                purged_markups.push(purged_markup)
             }
 
             this.project = {
                 project_id: projectId,
                 name: projectName,
                 version: projectVersion,
-                markups: this.markups,
+                markups: undefined,
+                reader: this,
                 extension_schema: extension_schema
             }
+
+            this.project.markups = purged_markups.map(mkp => { return { ...mkp, project: this.project } as IMarkup })
 
         } catch (e) {
             console.log("Error in loading BCF archive. The error below was thrown.")
@@ -87,7 +99,7 @@ export class Markup {
 
     header: IHeader | undefined
     topic: ITopic | undefined
-    viewpoints: VisualizationInfo[] = [];
+    viewpoints: VisualizationInfo[] = []
 
     constructor(reader: BcfReader, markup: ZipEntry) {
         this.reader = reader
@@ -120,16 +132,43 @@ export class Markup {
                 if (!file) throw new Error("Missing Visualization Info")
 
                 const viewpoint = this.reader.helpers.GetViewpoint(await file.text())
+                viewpoint.snapshot = entry.snapshot
+                viewpoint.getSnapshot = async () => { if (entry.snapshot) return await this.getSnapshot(entry.snapshot) }
+
                 this.viewpoints.push(viewpoint)
             }
         }
     }
 
-    getViewpointSnapshot = async (viewpoint: IViewPoint): Promise<ArrayBuffer | undefined> => {
+    /**
+     * Parses the png snapshot.
+     * 
+     * @returns {string} The image in base64String format.
+     * 
+     * @deprecated This function is deprecated and will be removed in the next version.<br>
+     * Please use viewpoint.getSnapshot() instead.<br>
+     *
+    */
+    getViewpointSnapshot = async (viewpoint: VisualizationInfo | IViewPoint): Promise<string | undefined> => {
         if (!viewpoint || !this.topic) return
         const entry = this.reader.getEntry(`${this.topic.guid}/${viewpoint.snapshot}`)
         if (entry) {
-            return await entry.arrayBuffer()
+            const arrayBuffer = await entry.arrayBuffer()
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer) as any))
+        }
+    }
+
+    /**
+     * Parses the png snapshot.
+     *
+     * @returns {string} The image in base64String format.
+    */
+    getSnapshot = async (guid: string): Promise<string | undefined> => {
+        if (!guid || !this.topic) return
+        const entry = this.reader.getEntry(`${this.topic.guid}/${guid}`)
+        if (entry) {
+            const arrayBuffer = await entry.arrayBuffer()
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer) as any))
         }
     }
 }

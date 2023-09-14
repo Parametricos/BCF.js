@@ -103,8 +103,34 @@ function projectbcfp(projectId: string, projectName: string): IFile {
 }
 
 function extensionssxd(writer: BcfWriter): IFile {
-    let xml = new XMLBuilder(writer.helpers.XmlBuilderOptions).build(writer.project?.extension_schema)
-    xml = `<?xml version="1.0" encoding="utf-8"?>${xml}`
+    const attributes = [
+        'version',
+        'encoding',
+        'standalone',
+        'xmlns',
+        'schemaLocation',
+        'name',
+        'base',
+        'value'
+    ]
+
+    const options = {
+        additional_attributes: attributes,
+        firstletter_uppercase: false,
+        plural_to_singular: false
+    }
+
+    let helpers = writer.helpers
+
+    if(writer.version == '3.0'){
+        const v21 = require('./2.1/index')
+        const helpersV21: BcfWriter = new v21.BcfWriter()
+        helpers = helpersV21.helpers
+    }
+
+    const formattedXml: any = helpers.RenameJsonKeys(writer.project?.extension_schema, options)
+
+    let xml = new XMLBuilder(helpers.XmlBuilderOptions).build(formattedXml)
 
     return {
         path: 'extensions.xsd',
